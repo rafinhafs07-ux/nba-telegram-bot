@@ -3,7 +3,7 @@ from telegram.ext import Updater, CommandHandler
 from api import get_players_data
 from analysis import analisar_jogadores
 
-TOKEN = os.getenv("TOKEN")
+TOKEN = os.getenv("8612950541:AAGZ7hWSZu1mS17lv7ubQVwzhPIvNTgT_0c")
 
 def analise(update, context):
     jogadores = get_players_data()
