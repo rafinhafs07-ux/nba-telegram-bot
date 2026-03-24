@@ -4,7 +4,7 @@ from telegram.ext import Application, CommandHandler
 from api import get_players_data  # Assuma que isso funciona
 from analysis import analisar_jogadores  # Assuma que isso funciona
 
-TOKEN = os.getenv("8612950541:AAGZ7hWSZu1mS17lv7ubQVwzhPIvNTgT_0c")  # Use env var no Render!
+TOKEN = os.getenv("8612950541:AAFENbnJuahCJrEJ9_D-j1tOw4--Af-7YYU")  # Use env var no Render!
 
 async def analise(update, context):
     jogadores = get_players_data()
