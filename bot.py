@@ -1,15 +1,11 @@
 import os
-import nest_asyncio  # Fix para Python 3.14 + PTB
-import asyncio
 from telegram.ext import Application, CommandHandler
 from api import get_players_data
 from analysis import analisar_jogadores
 
-nest_asyncio.apply()  # Permite nested loops no Render
-
 TOKEN = os.getenv("TOKEN")
 if not TOKEN:
-    print("❌ ERRO: Defina TOKEN na env var!")
+    print("❌ ERRO: TOKEN não definido!")
     exit(1)
 
 async def analise(update, context):
@@ -25,17 +21,16 @@ async def analise(update, context):
         mensagem += "\n💡 Baseado em baixa eficiência + volume"
         await update.message.reply_text(mensagem)
     except Exception as e:
-        await update.message.reply_text(f"Erro: {str(e)}")
+        await update.message.reply_text(f"❌ Erro na análise: {str(e)}")
 
 async def start(update, context):
-    await update.message.reply_text("🤖 Bot NBA Online! Use /analise")
+    await update.message.reply_text("🤖 Bot NBA Online!\nUse /analise para under 3pts.")
 
-async def main():
+# MAIN SÍNCRONO - FUNCIONA NO RENDER PYTHON 3.14
+if __name__ == "__main__":
+    print("🚀 Iniciando NBA Bot...")
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("analise", analise))
-    print("🚀 Bot iniciado com polling...")
-    await app.run_polling()
-
-if __name__ == "__main__":
-    asyncio.run(main())
+    print("✅ Bot rodando com polling...")
+    app.run_polling(drop_pending_updates=True)  # drop_pending_updates evita spam inicial
