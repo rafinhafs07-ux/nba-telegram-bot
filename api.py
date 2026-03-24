@@ -4,7 +4,7 @@ import os
 API_KEY = os.getenv("API_KEY")
 
 def get_players_data():
-    url = "https://api-nba-v1.p.rapidapi.com/players/statistics?season=2023"
+    url = "https://api-nba-v1.p.rapidapi.com/players?season=2023"
 
     headers = {
         "X-RapidAPI-Key": API_KEY,
@@ -14,7 +14,7 @@ def get_players_data():
     response = requests.get(url, headers=headers)
 
     if response.status_code != 200:
-        print("Erro na API:", response.status_code)
+        print("Erro API:", response.status_code)
         return []
 
     data = response.json()
@@ -23,17 +23,15 @@ def get_players_data():
 
     for item in data.get("response", []):
         try:
-            stats = item["statistics"][0]
-
             jogador = {
-                "name": item["player"]["firstname"] + " " + item["player"]["lastname"],
-                "threePointAttempts": stats.get("fg3a", 0),
-                "threePointPct": stats.get("fg3p", 0) / 100
+                "name": item["firstname"] + " " + item["lastname"],
+                "threePointAttempts": 0,  # essa API não traz direto
+                "threePointPct": 0        # precisa de outro endpoint
             }
 
             jogadores.append(jogador)
 
-        except Exception as e:
+        except:
             continue
 
     return jogadores
