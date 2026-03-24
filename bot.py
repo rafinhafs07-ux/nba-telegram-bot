@@ -1,11 +1,12 @@
 import os
-from telegram.ext import Updater, CommandHandler
-from api import get_players_data
-from analysis import analisar_jogadores
+import asyncio
+from telegram.ext import Application, CommandHandler
+from api import get_players_data  # Assuma que isso funciona
+from analysis import analisar_jogadores  # Assuma que isso funciona
 
-TOKEN = os.getenv("8612950541:AAGZ7hWSZu1mS17lv7ubQVwzhPIvNTgT_0c")
+TOKEN = os.getenv("8612950541:AAGZ7hWSZu1mS17lv7ubQVwzhPIvNTgT_0c")  # Use env var no Render!
 
-def analise(update, context):
+async def analise(update, context):
     jogadores = get_players_data()
     resultado = analisar_jogadores(jogadores)
 
@@ -19,16 +20,16 @@ def analise(update, context):
 
     mensagem += "\n💡 Baseado em baixa eficiência + volume"
 
-    update.message.reply_text(mensagem)
+    await update.message.reply_text(mensagem)
 
-def start(update, context):
-    update.message.reply_text("🤖 Bot NBA Online! Use /analise")
+async def start(update, context):
+    await update.message.reply_text("🤖 Bot NBA Online! Use /analise")
 
-updater = Updater(TOKEN, use_context=True)
-dp = updater.dispatcher
+def main():
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("analise", analise))
+    app.run_polling()
 
-dp.add_handler(CommandHandler("start", start))
-dp.add_handler(CommandHandler("analise", analise))
-
-updater.start_polling()
-updater.idle()
+if __name__ == "__main__":
+    main()
