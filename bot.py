@@ -1,70 +1,56 @@
 import os
+from telegram.ext import Updater, CommandHandler
 import logging
-from telegram.ext import Application, CommandHandler
 
-# Logging pra debug no Render
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
-logger = logging.getLogger(__name__)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 def get_players_data():
-    # Placeholder - substitua pela sua NBA API real
-    from api import get_players_data as _get
-    return _get()
+    try:
+        from api import get_players_data
+        return get_players_data()
+    except:
+        return []
 
 def analisar_jogadores(jogadores):
-    # Placeholder - substitua pela sua análise
-    from analysis import analisar_jogadores as _analyze
-    return _analyze(jogadores)
+    try:
+        from analysis import analisar_jogadores
+        return analisar_jogadores(jogadores)
+    except:
+        return []
 
-TOKEN = os.getenv("TOKEN")
+TOKEN = os.getenv('TOKEN')
 if not TOKEN:
-    logger.error("❌ TOKEN não definido na env var!")
+    print("ERRO: TOKEN não definido!")
     exit(1)
 
-async def analise(update, context):
-    try:
-        logger.info("Executando /analise...")
-        jogadores = get_players_data()
-        resultado = analisar_jogadores(jogadores)
-        
-        mensagem = "📊 ANÁLISE NBA – UNDER 3 PONTOS\n\n"
-        if not resultado:
-            mensagem += "Nenhum jogador encontrado hoje."
-        else:
-            for j in resultado:
-                pct = j.get('threePointPct', 0) * 100
-                tent = j.get('threePointAttempts', 0)
-                mensagem += f"• {j.get('name', 'N/A')} | {pct:.1f}% | {tent} tentativas\n"
-        
-        mensagem += "\n💡 Baixa eficiência + volume"
-        await update.message.reply_text(mensagem)
-        logger.info("Análise enviada!")
-    except Exception as e:
-        logger.error(f"Erro em /analise: {e}")
-        await update.message.reply_text(f"❌ Erro: {str(e)}")
+def analise(update, context):
+    jogadores = get_players_data()
+    resultado = analisar_jogadores(jogadores)
+    
+    mensagem = "📊 ANÁLISE NBA – UNDER 3 PONTOS\n\n"
+    if not resultado:
+        mensagem += "Nenhum jogador encontrado hoje."
+    else:
+        for j in resultado:
+            pct = j.get('threePointPct', 0) * 100
+            tent = j.get('threePointAttempts', 0)
+            mensagem += f"• {j.get('name', 'N/A')} | {pct:.1f}% | {tent} tentativas\n"
+    mensagem += "\n💡 Baixa eficiência + volume"
+    
+    update.message.reply_text(mensagem)
 
-async def start(update, context):
-    await update.message.reply_text("🤖 NBA Under Bot Online!\nUse /analise para tips under 3pts.")
+def start(update, context):
+    update.message.reply_text("🤖 NBA Bot Online! Use /analise")
 
 def main():
-    logger.info("🚀 Iniciando NBA Bot...")
-    builder = Application.builder().token(TOKEN)
-    app = builder.build()
+    updater = Updater(TOKEN, use_context=True)
+    dp = updater.dispatcher
+    dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CommandHandler("analise", analise))
     
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("analise", analise))
-    
-    logger.info("✅ Bot configurado - iniciando polling...")
-    # PTB v22 + drop_pending_updates + close_loop=False = PERFEITO pro Render
-    app.run_polling(
-        drop_pending_updates=True,  # Ignora mensagens antigas
-        close_loop=False,           # Evita close error
-        timeout=10,                 # Timeout pra estabilidade
-        bootstrap_retries=-1        # Retry infinito
-    )
+    print("🚀 Bot iniciado!")
+    updater.start_polling()
+    updater.idle()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
