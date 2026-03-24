@@ -1,7 +1,7 @@
 import os
 from telegram.ext import Updater, CommandHandler
 
-TOKEN = os.getenv("8612950541:AAGZ7hWSZu1mS17lv7ubQVwzhPIvNTgT_0c")
+TOKEN = os.getenv("TOKEN")
 
 def start(update, context):
     update.message.reply_text("🤖 Bot da NBA está online!")
