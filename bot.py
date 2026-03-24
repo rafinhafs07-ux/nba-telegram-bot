@@ -1,13 +1,28 @@
 import os
 from telegram.ext import Updater, CommandHandler
+from api import get_players_data
+from analysis import analisar_jogadores
 
 TOKEN = os.getenv("TOKEN")
 
-def start(update, context):
-    update.message.reply_text("🤖 Bot da NBA está online!")
-
 def analise(update, context):
-    update.message.reply_text("📊 Análise em breve...")
+    jogadores = get_players_data()
+    resultado = analisar_jogadores(jogadores)
+
+    mensagem = "📊 ANÁLISE NBA – UNDER 3 PONTOS\n\n"
+
+    if not resultado:
+        mensagem += "Nenhum jogador encontrado hoje."
+    else:
+        for j in resultado:
+            mensagem += f"• {j['name']} | {j['threePointPct']*100:.1f}% | {j['threePointAttempts']} tentativas\n"
+
+    mensagem += "\n💡 Baseado em baixa eficiência + volume"
+
+    update.message.reply_text(mensagem)
+
+def start(update, context):
+    update.message.reply_text("🤖 Bot NBA Online! Use /analise")
 
 updater = Updater(TOKEN, use_context=True)
 dp = updater.dispatcher
